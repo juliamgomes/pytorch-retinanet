@@ -32,7 +32,7 @@ def main(args=None):
     parser.add_argument('--csv_val', help='Filename containing validation annotations', required=True)
     parser.add_argument('--model-name', help='Name of model when saving final checkpoint.', required=True)
 
-    parser.add_argument('--depth', help='Resnet depth, must be one of 18, 34, 50, 101, 152', type=int, default=18)
+    parser.add_argument('--depth', help='Resnet depth, must be one of 18, 34, 50, 101, 152', type=int, default=34)
     parser.add_argument('--epochs', help='Number of epochs', type=int, default=50)
 
     parser = parser.parse_args(args)
@@ -62,7 +62,7 @@ def main(args=None):
     else:
         raise ValueError('Dataset type not understood (must be csv or coco), exiting.')
 
-    sampler = AspectRatioBasedSampler(dataset_train, batch_size=2, drop_last=False)
+    sampler = AspectRatioBasedSampler(dataset_train, batch_size=16, drop_last=False)
     dataloader_train = DataLoader(dataset_train, num_workers=3, collate_fn=collater, batch_sampler=sampler)
 
     if dataset_val is not None:
