@@ -22,13 +22,17 @@ print('CUDA available: {}'.format(torch.cuda.is_available()))
 def main(args=None):
     parser = argparse.ArgumentParser(description='Simple training script for training a RetinaNet network.')
 
-    parser.add_argument('--dataset', help='Dataset type, must be one of csv or coco.')
+    parser.add_argument('--dataset', help='Dataset type, must be one of csv or coco.', default="csv")
+    parser.add_argument(
+        '--root', help="Root directory of csv files", default="/mnt/remote/data/users/julia/traffic_lights_coco/"
+    )
     parser.add_argument('--coco_path', help='Path to COCO directory')
-    parser.add_argument('--csv_train', help='Path to file containing training annotations (see readme)')
-    parser.add_argument('--csv_classes', help='Path to file containing class list (see readme)')
-    parser.add_argument('--csv_val', help='Path to file containing validation annotations (optional, see readme)')
+    parser.add_argument('--csv_train', help='Filename containing training annotations (see readme)', required=True)
+    parser.add_argument('--csv_classes', help='Filename containing class list (see readme)', required=True)
+    parser.add_argument('--csv_val', help='Filename containing validation annotations', required=True)
+    parser.add_argument('--model-name', help='Name of model when saving final checkpoint.', required=True)
 
-    parser.add_argument('--depth', help='Resnet depth, must be one of 18, 34, 50, 101, 152', type=int, default=18)
+    parser.add_argument('--depth', help='Resnet depth, must be one of 18, 34, 50, 101, 152', type=int, default=34)
     parser.add_argument('--epochs', help='Number of epochs', type=int, default=50)
 
     parser = parser.parse_args(args)
@@ -42,20 +46,23 @@ def main(args=None):
         if parser.csv_classes is None:
             raise ValueError('Must provide --csv_classes when training on COCO,')
 
-        dataset_train = CSVDataset(train_file=parser.csv_train, class_list=parser.csv_classes,
+        csv_train = os.path.join(parser.root, parser.csv_train)
+        csv_val = os.path.join(parser.root, parser.csv_val)
+        csv_classes = os.path.join(parser.root, parser.csv_classes)
+        dataset_train = CSVDataset(train_file=csv_train, class_list=csv_classes,
                                    transform=transforms.Compose([Normalizer(), Augmenter(), Resizer()]))
 
-        if parser.csv_val is None:
+        if csv_val is None:
             dataset_val = None
             print('No validation annotations provided.')
         else:
-            dataset_val = CSVDataset(train_file=parser.csv_val, class_list=parser.csv_classes,
+            dataset_val = CSVDataset(train_file=csv_val, class_list=csv_classes,
                                      transform=transforms.Compose([Normalizer(), Resizer()]))
 
     else:
         raise ValueError('Dataset type not understood (must be csv or coco), exiting.')
 
-    sampler = AspectRatioBasedSampler(dataset_train, batch_size=2, drop_last=False)
+    sampler = AspectRatioBasedSampler(dataset_train, batch_size=64, drop_last=False)
     dataloader_train = DataLoader(dataset_train, num_workers=3, collate_fn=collater, batch_sampler=sampler)
 
     if dataset_val is not None:
@@ -144,7 +151,7 @@ def main(args=None):
                 print(e)
                 continue
 
-        if parser.dataset == 'csv' and parser.csv_val is not None:
+        if parser.dataset == 'csv' and csv_val is not None:
 
             print('Evaluating dataset')
 
@@ -156,7 +163,7 @@ def main(args=None):
 
     retinanet.eval()
 
-    torch.save(retinanet, 'model_final.pt')
+    torch.save(retinanet, f'{parser.model_name}_model_final.pt')
 
 
 if __name__ == '__main__':
