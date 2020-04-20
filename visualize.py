@@ -31,12 +31,18 @@ def main(args=None):
 	parser.add_argument('--coco_path', help='Path to COCO directory')
 	parser.add_argument('--csv_classes', help='Path to file containing class list (see readme)')
 	parser.add_argument('--csv_val', help='Path to file containing validation annotations (optional, see readme)')
+	parser.add_argument(
+		'--root', help="Root directory of csv files", default="/mnt/remote/data/users/julia/traffic_lights_coco/"
+	)
 
 	parser.add_argument('--model', help='Path to model (.pt) file.')
 
 	parser = parser.parse_args(args)
 
-	dataset_val = CSVDataset(train_file=parser.csv_val, class_list=parser.csv_classes, transform=transforms.Compose([Normalizer(), Resizer()]))
+	csv_val = os.path.join(parser.root, parser.csv_val)
+	csv_classes = os.path.join(parser.root, parser.csv_classes)
+
+	dataset_val = CSVDataset(train_file=csv_val, class_list=csv_classes, transform=transforms.Compose([Normalizer(), Resizer()]))
 
 	sampler_val = AspectRatioBasedSampler(dataset_val, batch_size=1, drop_last=False)
 	dataloader_val = DataLoader(dataset_val, num_workers=1, collate_fn=collater, batch_sampler=sampler_val)
@@ -63,6 +69,11 @@ def main(args=None):
 		b = np.array(box).astype(int)
 		cv2.putText(image, caption, (b[0], b[1] - 10), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
 		cv2.putText(image, caption, (b[0], b[1] - 10), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 1)
+
+	subdir = parser.model.split('.')[0]
+	save_image_dir = os.path.join(parser.root, "validation_images_model_viz", subdir)
+	if not os.path.exists(save_image_dir):
+		os.makedirs(save_image_dir)
 
 	for idx, data in enumerate(dataloader_val):
 
@@ -98,7 +109,9 @@ def main(args=None):
 			# cv2.imshow('img', img)
 			# cv2.waitKey(500)
 			im = Image.fromarray(img)
-			im.save(f"/home/julia/code/pytorch-retinanet/results/signal_{idx}.png", "png")
+			im.save(
+				f"{save_image_dir}/image_{idx}.png", "png"
+			)
 
 
 
