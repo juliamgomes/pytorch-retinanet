@@ -8,11 +8,10 @@ import torch.optim as optim
 from torchvision import transforms
 
 from retinanet import model
-from retinanet.dataloader import CocoDataset, CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, \
+from retinanet.dataloader import CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, \
     Normalizer
 from torch.utils.data import DataLoader
 
-from retinanet import coco_eval
 from retinanet import csv_eval
 
 assert torch.__version__.split('.')[0] == '1'
@@ -29,23 +28,13 @@ def main(args=None):
     parser.add_argument('--csv_classes', help='Path to file containing class list (see readme)')
     parser.add_argument('--csv_val', help='Path to file containing validation annotations (optional, see readme)')
 
-    parser.add_argument('--depth', help='Resnet depth, must be one of 18, 34, 50, 101, 152', type=int, default=50)
-    parser.add_argument('--epochs', help='Number of epochs', type=int, default=100)
+    parser.add_argument('--depth', help='Resnet depth, must be one of 18, 34, 50, 101, 152', type=int, default=18)
+    parser.add_argument('--epochs', help='Number of epochs', type=int, default=50)
 
     parser = parser.parse_args(args)
 
     # Create the data loaders
-    if parser.dataset == 'coco':
-
-        if parser.coco_path is None:
-            raise ValueError('Must provide --coco_path when training on COCO,')
-
-        dataset_train = CocoDataset(parser.coco_path, set_name='train2017',
-                                    transform=transforms.Compose([Normalizer(), Augmenter(), Resizer()]))
-        dataset_val = CocoDataset(parser.coco_path, set_name='val2017',
-                                  transform=transforms.Compose([Normalizer(), Resizer()]))
-
-    elif parser.dataset == 'csv':
+    if parser.dataset == 'csv':
 
         if parser.csv_train is None:
             raise ValueError('Must provide --csv_train when training on COCO,')
@@ -155,13 +144,7 @@ def main(args=None):
                 print(e)
                 continue
 
-        if parser.dataset == 'coco':
-
-            print('Evaluating dataset')
-
-            coco_eval.evaluate_coco(dataset_val, retinanet)
-
-        elif parser.dataset == 'csv' and parser.csv_val is not None:
+        if parser.dataset == 'csv' and parser.csv_val is not None:
 
             print('Evaluating dataset')
 

@@ -6,6 +6,7 @@ import copy
 import pdb
 import time
 import argparse
+from PIL import Image
 
 import sys
 import cv2
@@ -14,7 +15,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import datasets, models, transforms
 
-from retinanet.dataloader import CocoDataset, CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, \
+from retinanet.dataloader import CSVDataset, collater, Resizer, AspectRatioBasedSampler, Augmenter, \
 	UnNormalizer, Normalizer
 
 
@@ -35,12 +36,7 @@ def main(args=None):
 
 	parser = parser.parse_args(args)
 
-	if parser.dataset == 'coco':
-		dataset_val = CocoDataset(parser.coco_path, set_name='train2017', transform=transforms.Compose([Normalizer(), Resizer()]))
-	elif parser.dataset == 'csv':
-		dataset_val = CSVDataset(train_file=parser.csv_train, class_list=parser.csv_classes, transform=transforms.Compose([Normalizer(), Resizer()]))
-	else:
-		raise ValueError('Dataset type not understood (must be csv or coco), exiting.')
+	dataset_val = CSVDataset(train_file=parser.csv_val, class_list=parser.csv_classes, transform=transforms.Compose([Normalizer(), Resizer()]))
 
 	sampler_val = AspectRatioBasedSampler(dataset_val, batch_size=1, drop_last=False)
 	dataloader_val = DataLoader(dataset_val, num_workers=1, collate_fn=collater, batch_sampler=sampler_val)
@@ -99,8 +95,10 @@ def main(args=None):
 				cv2.rectangle(img, (x1, y1), (x2, y2), color=(0, 0, 255), thickness=2)
 				print(label_name)
 
-			cv2.imshow('img', img)
-			cv2.waitKey(0)
+			# cv2.imshow('img', img)
+			# cv2.waitKey(500)
+			im = Image.fromarray(img)
+			im.save(f"/home/julia/code/pytorch-retinanet/results/signal_{idx}.png", "png")
 
 
 
