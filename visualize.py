@@ -70,7 +70,7 @@ def main(args=None):
 		cv2.putText(image, caption, (b[0], b[1] - 10), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
 		cv2.putText(image, caption, (b[0], b[1] - 10), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 1)
 
-	subdir = parser.model_name.split('.')[0]
+	subdir = parser.model.split('.')[0]
 	save_image_dir = os.path.join(parser.root, "validation_images_model_viz", subdir)
 	if not os.path.exists(save_image_dir):
 		os.makedirs(save_image_dir)
