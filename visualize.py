@@ -64,6 +64,11 @@ def main(args=None):
 		cv2.putText(image, caption, (b[0], b[1] - 10), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
 		cv2.putText(image, caption, (b[0], b[1] - 10), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 1)
 
+	subdir = parser.model_name.split('.')[0]
+	save_image_dir = f"/mnt/remote/data/users/julia/traffic_lights_coco/validation_images_model_viz/{subdir}"
+	if not os.path.exists(save_image_dir):
+		os.makedirs(save_image_dir)
+
 	for idx, data in enumerate(dataloader_val):
 
 		with torch.no_grad():
@@ -98,7 +103,9 @@ def main(args=None):
 			# cv2.imshow('img', img)
 			# cv2.waitKey(500)
 			im = Image.fromarray(img)
-			im.save(f"/home/julia/code/pytorch-retinanet/results/signal_{idx}.png", "png")
+			im.save(
+				f"{save_image_dir}/image_{idx}.png", "png"
+			)
 
 
 
