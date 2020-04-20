@@ -11,10 +11,8 @@ class Anchors(nn.Module):
             self.pyramid_levels = [3, 4, 5, 6, 7]
         if strides is None:
             self.strides = [2 ** x for x in self.pyramid_levels]
-        if sizes is None:
-            self.sizes = [2 ** (x + 2) for x in self.pyramid_levels]
-        if ratios is None:
-            self.ratios = np.array([0.5, 1, 2])
+        self.sizes = [2 ** x for x in self.pyramid_levels]
+        self.ratios = np.array([0.5, 1, 2.4])
         if scales is None:
             self.scales = np.array([2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)])
 
@@ -39,7 +37,7 @@ class Anchors(nn.Module):
         else:
             return torch.from_numpy(all_anchors.astype(np.float32))
 
-def generate_anchors(base_size=16, ratios=None, scales=None):
+def generate_anchors(base_size=4, ratios=None, scales=None):
     """
     Generate anchor (reference) windows by enumerating aspect ratios X
     scales w.r.t. a reference window.
