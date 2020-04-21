@@ -32,7 +32,7 @@ def main(args=None):
 	parser.add_argument('--csv_classes', help='Path to file containing class list (see readme)')
 	parser.add_argument('--csv_val', help='Path to file containing validation annotations (optional, see readme)')
 	parser.add_argument(
-		'--root', help="Root directory of csv files", default="/mnt/remote/data/users/julia/traffic_lights_coco/"
+		'--root', help="Root directory of csv files", default="/mnt/remote/data/users/julia/traffic_lights_coco_april_20/"
 	)
 
 	parser.add_argument('--model', help='Path to model (.pt) file.')

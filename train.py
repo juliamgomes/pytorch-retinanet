@@ -24,7 +24,7 @@ def main(args=None):
 
     parser.add_argument('--dataset', help='Dataset type, must be one of csv or coco.', default="csv")
     parser.add_argument(
-        '--root', help="Root directory of csv files", default="/mnt/remote/data/users/julia/traffic_lights_coco/"
+        '--root', help="Root directory of csv files", default="/mnt/remote/data/users/julia/traffic_lights_coco_april_20/"
     )
     parser.add_argument('--coco_path', help='Path to COCO directory')
     parser.add_argument('--csv_train', help='Filename containing training annotations (see readme)', required=True)
