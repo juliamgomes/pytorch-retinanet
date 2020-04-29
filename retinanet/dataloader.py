@@ -108,6 +108,7 @@ class CSVDataset(Dataset):
 
     def load_image(self, image_index):
         img = skimage.io.imread(self.image_names[image_index])
+        img = img[:224, :480]
 
         if len(img.shape) == 2:
             img = skimage.color.gray2rgb(img)
