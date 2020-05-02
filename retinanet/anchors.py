@@ -55,13 +55,13 @@ def generate_anchors(base_size=4, ratios=None, scales=None):
     anchors = np.zeros((num_anchors, 4))
 
     # scale base_size
-    anchors[:, 2:] = base_size * np.tile(scales, (2, len(ratios))).T
+    anchors[:, 2:] = base_size * np.tile(scales, (2, len(ratios))).T    # (9, 4) (num anchors, num corners)
 
     # compute areas of anchors
-    areas = anchors[:, 2] * anchors[:, 3]
+    areas = anchors[:, 2] * anchors[:, 3]   # (9, ) (num anchors, )
 
     # correct for ratios
-    anchors[:, 2] = np.sqrt(areas / np.repeat(ratios, len(scales)))
+    anchors[:, 2] = np.sqrt(areas / np.repeat(ratios, len(scales)))     # (9, 4)
     anchors[:, 3] = anchors[:, 2] * np.repeat(ratios, len(scales))
 
     # transform from (x_ctr, y_ctr, w, h) -> (x1, y1, x2, y2)
@@ -105,24 +105,27 @@ def anchors_for_shape(
 
 
 def shift(shape, stride, anchors):
-    shift_x = (np.arange(0, shape[1]) + 0.5) * stride
-    shift_y = (np.arange(0, shape[0]) + 0.5) * stride
+    # shape array([ 80, 124])
+    # 8
+    # anchors (9, 4)
+    shift_x = (np.arange(0, shape[1]) + 0.5) * stride   # (80, 124) (image height, image width)
+    shift_y = (np.arange(0, shape[0]) + 0.5) * stride   # (80, 124) (image height, image width)
 
     shift_x, shift_y = np.meshgrid(shift_x, shift_y)
 
     shifts = np.vstack((
         shift_x.ravel(), shift_y.ravel(),
         shift_x.ravel(), shift_y.ravel()
-    )).transpose()
+    )).transpose()  # (9920, 4) (image area, num bbox corners)
 
     # add A anchors (1, A, 4) to
     # cell K shifts (K, 1, 4) to get
     # shift anchors (K, A, 4)
     # reshape to (K*A, 4) shifted anchors
-    A = anchors.shape[0]
-    K = shifts.shape[0]
+    A = anchors.shape[0]    # A is num anchors
+    K = shifts.shape[0]     # 9920, image area
     all_anchors = (anchors.reshape((1, A, 4)) + shifts.reshape((1, K, 4)).transpose((1, 0, 2)))
-    all_anchors = all_anchors.reshape((K * A, 4))
+    all_anchors = all_anchors.reshape((K * A, 4))   # 9920 * 9 = 89280
 
     return all_anchors
 
