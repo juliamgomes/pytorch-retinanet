@@ -133,8 +133,6 @@ def main(args=None):
 
                 loss.backward()
 
-                torch.nn.utils.clip_grad_norm_(retinanet.parameters(), 0.1)
-
                 optimizer.step()
 
                 loss_hist.append(float(loss))
